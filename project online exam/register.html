@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Registration</title>
+    <link rel="stylesheet" href="style1.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Student Registration</h1>
+
+    <form id="registerForm">
+
+        <input type="text" id="name" name="name"
+               placeholder="👤 Enter Your Name" required><br><br>
+        <p id="e1" style="color:red"></p>
+
+        <input type="email" id="email" name="email"
+               placeholder="📧 Enter Your Email" required><br><br>
+        <p id="e2" style="color:red"></p>
+
+        <input type="password" id="password" name="password"
+               placeholder="🔒 Enter Your Password" required><br><br>
+        <p id="e3" style="color:red"></p>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <p id="result"></p>
+
+</div>
+<script>
+
+document.getElementById("registerForm").onsubmit =
+async function(e) {
+
+    e.preventDefault();
+
+    let valid = true;
+
+    let name = document.getElementById("name").value;
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
+
+    document.getElementById("e1").innerHTML = "";
+    document.getElementById("e2").innerHTML = "";
+    document.getElementById("e3").innerHTML = "";
+    document.getElementById("result").innerHTML = "";
+
+    if(name.trim() == "") {
+        document.getElementById("e1").innerHTML =
+            "Please enter name";
+        valid = false;
+    }
+
+    if(email.trim() == "") {
+        document.getElementById("e2").innerHTML =
+            "Please enter email";
+        valid = false;
+    }
+
+    if(password.trim() == "") {
+        document.getElementById("e3").innerHTML =
+            "Please enter password";
+        valid = false;
+    }
+
+    if(!valid) {
+        return;
+    }
+
+    let data = new URLSearchParams({
+        name: name,
+        email: email,
+        password: password
+    });
+
+    try {
+
+        let response = await fetch(
+            "http://localhost:8081/register",
+            {
+                method: "POST",
+                body: data
+            }
+        );
+
+        let message = await response.text();
+
+        if(message.trim() == "Registration Successful!") {
+
+            window.location.href = "exam.html";
+
+        } else {
+
+            document.getElementById("result").innerHTML = message;
+
+        }
+
+    }
+    catch(error) {
+
+        document.getElementById("result").innerHTML =
+            "Server connection failed!";
+
+    }
+
+};
+
+</script>
+</body>
+</html>

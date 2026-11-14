@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Login</title>
+    <link rel="stylesheet" href="style1.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Student Login</h1>
+
+    <form id="loginForm">
+
+        <input type="email" id="email" name="email"
+               placeholder="Enter Email" required><br><br>
+        <p id="e1" style="color:red"></p>
+
+        <input type="password" id="password" name="password"
+               placeholder="Enter Password" required><br><br>
+        <p id="e2" style="color:red"></p>
+
+        <button type="submit">Login</button>
+
+    </form>
+
+    <p id="result"></p>
+
+</div>
+
+<script>
+
+document.getElementById("loginForm").onsubmit =
+async function(e) {
+
+    e.preventDefault();
+
+    let email = document.getElementById("email").value.trim();
+    let password = document.getElementById("password").value.trim();
+
+    document.getElementById("e1").innerHTML = "";
+    document.getElementById("e2").innerHTML = "";
+    document.getElementById("result").innerHTML = "";
+
+    let valid = true;
+
+    if(email == "") {
+        document.getElementById("e1").innerHTML =
+            "Please enter email";
+        valid = false;
+    }
+
+    if(password == "") {
+        document.getElementById("e2").innerHTML =
+            "Please enter password";
+        valid = false;
+    }
+
+    if(!valid) {
+        return;
+    }
+
+    let data = new URLSearchParams({
+        email: email,
+        password: password
+    });
+
+    try {
+
+        let response = await fetch(
+            "http://localhost:8081/login",
+            {
+                method: "POST",
+                body: data
+            }
+        );
+
+        let message = await response.text();
+
+        if(message.trim() == "Login Successful!") {
+            window.location.href = "exam.html";
+        }
+        else {
+            document.getElementById("result").innerHTML = message;
+        }
+
+    }
+    catch(error) {
+        document.getElementById("result").innerHTML =
+            "Server connection failed!";
+    }
+
+};
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,398 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title> Online Examination</title>
+
+<style>
+
+body {
+    background-color: lightblue;
+    font-family: Arial;
+    margin: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: darkblue;
+}
+
+#timer {
+    color: red;
+    text-align: right;
+    font-size: 25px;
+}
+
+.main {
+    display: flex;
+    gap: 20px;
+}
+
+.exam {
+    background-color: white;
+    padding: 25px;
+    width: 75%;
+    border-radius: 10px;
+}
+
+.palette {
+    background-color: white;
+    padding: 20px;
+    width: 25%;
+    border-radius: 10px;
+}
+
+.question {
+    font-size: 20px;
+    margin-bottom: 25px;
+}
+
+.option {
+    display: block;
+    padding: 12px;
+    margin: 10px 0;
+    background-color: lightgray;
+    color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.option input {
+    margin-right: 12px;
+}
+
+button {
+    padding: 12px 20px;
+    background-color: royalblue;
+    color: white;
+    border: none;
+    margin: 8px;
+    cursor: pointer;
+}
+
+button:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+.number {
+    width: 40px;
+    height: 40px;
+    margin: 5px;
+    background-color: lightcoral;
+    color: white;
+    border-radius: 5px;
+}
+
+.answered {
+    background-color: green;
+}
+
+#result {
+    text-align: center;
+    color: darkgreen;
+    font-size: 25px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Online Examination</h1>
+
+<h2 id="timer">Time Left: 10:00</h2>
+
+<div class="main">
+
+<div class="exam">
+
+<h3 id="qnumber"></h3>
+
+<p class="question" id="question"></p>
+
+<div id="options"></div>
+
+<hr>
+
+<button id="prev" onclick="previous()">Previous</button>
+
+<button id="next" onclick="saveNext()">Save & Next</button>
+
+<button id="submit" onclick="submitExam()">Submit Exam</button>
+
+</div>
+
+<div class="palette">
+
+<h3>QUESTIONS MARKED AND UNMARKED</h3>
+
+<p>
+<span style="color:green">■</span> Answered
+<br><br>
+<span style="color:lightcoral">■</span> Not Answered
+</p>
+
+<div id="palette"></div>
+
+</div>
+
+</div>
+
+<h2 id="result"></h2>
+
+<div id="answers"></div>
+
+<script>
+
+let questions = [
+
+{
+q:"What is the capital of India?",
+o:["Mumbai","New Delhi","Chennai","Hyderabad"],
+a:1
+},
+
+{
+q:"Who is the Father of the Nation?",
+o:["Nehru","Gandhi","Bose","Bhagat Singh"],
+a:1
+},
+
+{
+q:"Which is the largest planet?",
+o:["Earth","Mars","Jupiter","Venus"],
+a:2
+},
+
+{
+q:"What is the national animal of India?",
+o:["Lion","Tiger","Elephant","Deer"],
+a:1
+},
+
+{
+q:"Which is the longest river in India?",
+o:["Ganga","Yamuna","Godavari","Krishna"],
+a:0
+},
+
+{
+q:"How many colors are in a rainbow?",
+o:["Five","Six","Seven","Eight"],
+a:2
+},
+
+{
+q:"Who wrote the National Anthem?",
+o:["Tagore","Gandhi","Nehru","Bose"],
+a:0
+},
+
+{
+q:"Which is the smallest continent?",
+o:["Asia","Europe","Australia","Africa"],
+a:2
+},
+
+{
+q:"Which gas do plants absorb?",
+o:["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],
+a:1
+},
+
+{
+q:"What is the currency of Japan?",
+o:["Dollar","Rupee","Yen","Euro"],
+a:2
+}
+
+];
+
+let current = 0;
+
+let selected = Array(questions.length).fill(null);
+
+let submitted = false;
+
+function display() {
+
+    document.getElementById("qnumber").innerHTML =
+        "Question " + (current + 1) + " of " + questions.length;
+
+    document.getElementById("question").innerHTML =
+        questions[current].q;
+
+    let html = "";
+
+    for(let i = 0; i < 4; i++) {
+
+        html += `
+        <label class="option">
+
+        <input type="radio" name="answer"
+        value="${i}"
+        ${selected[current] === i ? "checked" : ""}
+        onchange="saveAnswer(${i})">
+
+        ${questions[current].o[i]}
+
+        </label>
+        `;
+    }
+
+    document.getElementById("options").innerHTML = html;
+
+    document.getElementById("prev").disabled = current === 0;
+
+    document.getElementById("next").disabled =
+        current === questions.length - 1;
+
+    let paletteHTML = "";
+
+    for(let i = 0; i < questions.length; i++) {
+
+        paletteHTML += `
+        <button class="number ${selected[i] !== null ? 'answered' : ''}"
+        onclick="goTo(${i})">
+        ${i + 1}
+        </button>
+        `;
+    }
+
+    document.getElementById("palette").innerHTML = paletteHTML;
+
+}
+
+function saveAnswer(value) {
+
+    selected[current] = value;
+
+    display();
+
+}
+
+function next() {
+
+    if(current < questions.length - 1) {
+
+        current++;
+
+        display();
+
+    }
+
+}
+
+function previous() {
+
+    if(current > 0) {
+
+        current--;
+
+        display();
+
+    }
+
+}
+
+function saveNext() {
+
+    next();
+
+}
+
+function goTo(n) {
+
+    current = n;
+
+    display();
+
+}
+
+function submitExam(autoSubmit = false) {
+
+    if(submitted) return;
+
+    if(!autoSubmit &&
+       !confirm("Are you sure you want to submit the exam?")) {
+        return;
+    }
+
+    submitted = true;
+
+    clearInterval(timer);
+
+    let score = 0;
+
+    let output = "";
+
+    for(let i = 0; i < questions.length; i++) {
+
+        if(selected[i] === questions[i].a) {
+
+            score++;
+
+            output += "<p>Question " + (i + 1) + ": Correct</p>";
+
+        }
+
+        else {
+
+            output += "<p>Question " + (i + 1) +
+            ": Incorrect. Correct answer: " +
+            questions[i].o[questions[i].a] + "</p>";
+
+        }
+
+    }
+
+    document.querySelector(".main").style.display = "none";
+
+    document.getElementById("timer").style.display = "none";
+
+    document.getElementById("result").innerHTML =
+        "Your Final Score: " + score + " / " + questions.length;
+
+    document.getElementById("answers").innerHTML = output;
+
+}
+
+
+// TIMER: 10 MINUTES
+
+let timeLeft = 10 * 60;
+
+let timer = setInterval(function() {
+
+    let minutes = Math.floor(timeLeft / 60);
+
+    let seconds = timeLeft % 60;
+
+    document.getElementById("timer").innerHTML =
+        "Time Left: " + minutes + ":" +
+        String(seconds).padStart(2, '0');
+
+    if(timeLeft <= 0) {
+
+        clearInterval(timer);
+
+        submitExam(true);
+
+        return;
+
+    }
+
+    timeLeft--;
+
+}, 1000);
+
+
+// DISPLAY FIRST QUESTION
+
+display();
+
+</script>
+
+</body>
+</html>
